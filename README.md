@@ -11,7 +11,7 @@ So that you don't spend more than four hours on this exercise, please note the f
 
 
 Guys, 
-Please check out my implementation. Seems to be working the same way as the anlular one does.
+Please check out my implementation. Seems to be working the same way as the angular one does.
 
 p.s. 
 - I did a shortcut by not implementing recalculation of contact categories dynamically, 
