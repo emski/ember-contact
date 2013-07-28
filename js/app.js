@@ -183,6 +183,7 @@ App.validatePhone = function(phone){
 	if(!phone)
 		return true;
 
+	// digits only
 	return /^\-?\d*$/.test(phone);
 };
 
