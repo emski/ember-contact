@@ -13,11 +13,12 @@
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
 <script src="/js/vendor/handlebars-1.0.0-rc.3.js"></script>
 <script src="/js/vendor/ember-1.0.0-rc.3.min.js"></script>
+<script src="/js/vendor/ember-data.js"></script>
 <script src="/js/app.js"></script>
 
-<script type="text/x-handlebars" data-template-name="application">
-  <div id="wrapper">
 
+<script type="text/x-handlebars" id="contacts">
+  <div id="wrapper">
     <header>
       <div id="logo">
         <a href="#">
@@ -25,137 +26,154 @@
         </a>
       </div>
     </header>
+
     <div id="smartSearch">
-      <input type="search" id="searchBox" placeholder="Who?">
-      {{!-- if search results exist
-        <ul id="searchResults">
-          {{!-- repeat for each contact
-            <li>
-              <a href="#">
-                {{!-- the name of the contact }}
-              </a>
-            </li>
-          }}
-        </ul>
-      --}}
-      {{!-- if no search results exist
-        <p>
-          A contact named <strong>{{!-- the search criteria }}</strong> is not found.
-        </p>
-      --}}
-      <div class="clearfix"></div>
+      {{render search}}
     </div>
+
     <hr/>
 
     <div id="contactsList" class="listContainer">
-      {{!-- repeat for each list of contacts
-        <dl>
-          <dt>{{!-- the name of the list }}</dt>
-          {{!-- repeat for each contact in the list
-            <dd>
-              <a href="#" class="cnt">
-                {{!-- the name of the contact }}
-              </a>
-            </dd>
-          }}
-        </dl>
-      --}}
+      {{render contactlist model.categories}}
     </div>
+
     <div id="rightViewContainer">
-      {{!-- put the add/edit/view template here --}}
+      {{outlet}}
     </div>
   </div>
 </script>
 
-<script type="text/x-handlebars" data-template-name="add">
-  <form name="myForm" class="formdesign">
-    <div>
-      <input type="text" placeholder="Name">
-      {{!-- displayed when the value is invalid
-        <span>
-          What good it will do without entering your contact`s name?
-        </span>
-      --}}
-    </div>
-    <div>
-      <input type="text" placeholder="Phone">
-      {{!-- displayed when the value is invalid
-        <span>
-          It is supposed to be a number. Right?
-        </span>
-      --}}
-    </div>
-    <div>
-      <input type="text" placeholder="Email">
-      {{!-- displayed when the value is invalid
-        <span>
-          From when they started to accept invalid emails?
-        </span>
-      --}}
-    </div>
-    <button {{!-- disable this button when any field is invalid --}}>
-      Save
-    </button>
-  </form>
+<script type="text/x-handlebars" id="search">  
+  {{input type="search" value=searchStr id="searchBox" placeholder="Who?"}}
+  
+  {{#if searchResults}}  
+    <ul id="searchResults">
+      {{#each result in searchResults}}
+        <li>
+          {{#linkTo 'contacts.contact' result class="cnt"}}
+            {{result.name}}
+          {{/linkTo}}
+        </li>
+      {{/each}}
+    </ul>
+  {{else}}
+    {{#if searchStr}}
+      <p>
+        A contact named <strong>{{searchStr}}</strong> is not found.
+      </p>
+    {{/if}}
+  {{/if}}
+
+  <div class="clearfix"></div>
 </script>
 
-<script type="text/x-handlebars" data-template-name="view">
+<script type="text/x-handlebars" id="contacts/index">
+  {{render 'contact/_add'}}
+</script>
+
+<script type="text/x-handlebars" data-template-name="contactlist">
+  {{#each item in controller}}
+    {{#if contacts}}
+      <dl>
+        <dt>{{name}}</dt>
+        {{#each contact in contacts}}
+          <dd>
+            {{#linkTo 'contacts.contact' contact class="cnt"}}
+              {{contact.name}}
+            {{/linkTo}}
+          </dd>
+        {{/each}}
+      </dl>
+    {{/if}}
+  {{/each}}
+</script>
+
+<script type="text/x-handlebars" data-template-name="contacts/contact">
   <div class="col1">
     <h2>
-      {{!-- the name of the contact --}}
+      {{name}}
     </h2>
     <img src="/img/profile_image.png" alt="">
   </div>
   <div class="col2">
     <p class="email">
-      {{!-- the email of the contact --}}
+      {{email}}&nbsp;
     </p>
     <p class="phone">
-      {{!-- the phone of the contact --}}
+      {{phone}}&nbsp;
     </p>
   </div>
   <hr/>
   <hr/>
-  <a class="btn btn-left back">
+  <a class="btn btn-left back" href="#/contacts">
     Go Back
   </a>
-  <a class="btn">
+  {{#linkTo 'contacts.edit' model class="btn"}}
     Edit
-  </a>
+  {{/linkTo}}
 </script>
 
-<script type="text/x-handlebars" data-template-name="edit">
-  <form name="myForm" class="formdesign">
+<script type="text/x-handlebars" data-template-name="contact/_add">
+  <form name="myForm" class="formdesign" {{action add content on='submit'}}>
     <div>
-      <input type="text" placeholder="Name">
-      {{!-- displayed when the value is invalid
+      {{view Ember.TextField valueBinding="content.name" placeholder="Name"}}
+      {{#unless nameIsValid}}
         <span>
           What good it will do without entering your contact`s name?
         </span>
-      --}}
+      {{/unless}}
     </div>
     <div>
-      <input type="text" placeholder="Phone">
-      {{!-- displayed when the value is invalid
+    {{view Ember.TextField valueBinding="content.phone" placeholder="Phone"}}
+      {{#unless phoneIsValid}}
         <span>
           It is supposed to be a number. Right?
         </span>
-      --}}
+      {{/unless}}
     </div>
     <div>
-      <input type="text" placeholder="Email">
-      {{!-- displayed when the value is invalid
+      {{view Ember.TextField valueBinding="content.email" placeholder="Email"}}
+      {{#unless emailIsValid}}
         <span>
           From when they started to accept invalid emails?
         </span>
-      --}}
+      {{/unless}}
     </div>
-    <button class="btn btn-left" {{!-- disabled when any field is invalid --}}>
-      Done
-    </button>
-    <button class="btn btn-danger">
-      Delete
-    </button>
+    <button type="submit" {{bindAttr disabled="formInvalid"}}>Add</button>
+  </form>
+</script>
+
+
+<script type="text/x-handlebars" data-template-name="contacts/edit">
+  <form name="myForm" class="formdesign">
+    <div>
+      {{view Ember.TextField valueBinding="clone.name" type="text" placeholder="Name"}}
+      {{#unless nameIsValid}}
+        <span>
+          What good it will do without entering your contact`s name?
+        </span>
+      {{/unless}}
+    </div>
+    <div>
+      {{view Ember.TextField valueBinding="clone.phone" type="text" placeholder="Phone"}}
+      {{#unless phoneIsValid}}
+        <span>
+          It is supposed to be a number. Right?
+        </span>
+      {{/unless}}
+    </div>
+    <div>
+      {{view Ember.TextField valueBinding="clone.email" type="text" placeholder="Email"}}
+      {{#unless emailIsValid}}
+        <span>
+          From when they started to accept invalid emails?
+        </span>
+      {{/unless}}
+    </div>
+    
+    <button {{action 'save'}} {{bindAttr disabled="formInvalid"}} class="btn btn-left">Done</button>
+    <button {{action 'delete'}}  class="btn btn-danger">Delete</button>
+
     </div>
   </form>
 </script>
