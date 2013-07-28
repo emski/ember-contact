@@ -78,7 +78,7 @@ App.SearchController = Ember.Controller.extend({
 	searchResults: function() {
 		var searchTxt = this.get('searchStr');
 		if(!searchTxt)
-			return;
+			return; 
 		
 		var reg = new RegExp(searchTxt, 'i');
 		
